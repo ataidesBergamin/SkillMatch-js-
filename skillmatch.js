@@ -9,17 +9,24 @@ const candidato = {
 const vagas = [
   //vaga
   {
-    vagaEmAberto: false,
+    vagaEmAberto: true,
     id: 1,
     empresa: "Tech Master",
     cargo: "Desenvolvedor Front-end Junior",
-    requisitos: ["JavaScript", "React", "Node.js"],
+    requisitos: [
+      "JavaScript",
+      "React",
+      "Node.js",
+      "Arrays",
+      "Funcoes",
+      "Objetos",
+    ],
     salario: 5000,
     modalidade: "Presencial",
   },
   //vaga
   {
-    vagaEmAberto: false,
+    vagaEmAberto: true,
     id: 2,
     empresa: "New Tech",
     cargo: "Desenvolvedor Front-end Junior",
@@ -43,7 +50,15 @@ const vagas = [
     id: 4,
     empresa: "Exelencia Softwares",
     cargo: "Desenvolvedor Front-end Junior",
-    requisitos: ["JavaScript", "React", "Node.js", "Ingles Intermediario"],
+    requisitos: [
+      "JavaScript",
+      "HTML5",
+      "CSS",
+      "GitHub",
+      "React",
+      "Node.js",
+      "Ingles Intermediario",
+    ],
     salario: 8000,
     modalidade: "Hibrida",
   },
@@ -54,42 +69,60 @@ function encontrarCompatibilidade(candidato, vagas) {
   let vagaCompativel = null;
 
   for (const vaga of vagas) {
-    // Ignora vagas fechadas
     if (!vaga.vagaEmAberto) continue;
-
-    let possuiNaVaga = [];
-    let faltaNaVaga = [];
-    // Verifica cada requisito da vaga
-    for (const requisito of vaga.requisitos) {
-      // Verifica se o candidato possui a habilidade exigida pela vaga
-      if (candidato.habilidades.includes(requisito)) {
-        possuiNaVaga.push(requisito);
-      } else {
-        faltaNaVaga.push(requisito);
-      }
-    }
-
+    // calcula quais habilidades o candidato possui e quais faltam para cada vaga
+    const { possuiNaVaga, faltaNaVaga } = vaga.requisitos.reduce(
+      (acumulador, requisito) => {
+        if (candidato.habilidades.includes(requisito)) {
+          acumulador.possuiNaVaga.push(requisito);
+        } else {
+          acumulador.faltaNaVaga.push(requisito);
+        }
+        return acumulador;
+      },
+      { possuiNaVaga: [], faltaNaVaga: [] },
+    );
+    // calcula o percentual de compatibilidade com base nas habilidades que o candidato possui em relação aos requisitos da vaga
     const percentualCompatibilidade =
       (possuiNaVaga.length / vaga.requisitos.length) * 100;
-
-    if (
-      vagaCompativel === null ||
-      percentualCompatibilidade > vagaCompativel.percentualCompatibilidade
+    // Cria um objeto para armazenar as informações da vaga e a compatibilidade calculada
+    const compativel = {
+      vaga,
+      percentualCompatibilidade,
+      possuiNaVaga,
+      faltaNaVaga,
+    };
+    vagaCompativel =
+      !vagaCompativel ||
+      compativel.percentualCompatibilidade >
+        vagaCompativel.percentualCompatibilidade
+        ? compativel
+        : vagaCompativel;
+    /*  if (
+      !vagaCompativel ||
+      compativel.percentualCompatibilidade >
+        vagaCompativel.percentualCompatibilidade
     ) {
-      vagaCompativel = {
-        vaga,
-        percentualCompatibilidade,
-        possuiNaVaga,
-        faltaNaVaga,
-      };
-    }
+      vagaCompativel = compativel;
+    } */
   }
-
   return vagaCompativel;
 }
-
 const vagaCompativel = encontrarCompatibilidade(candidato, vagas);
-
+// Classificar a compatibilidade em alta, média ou baixa com base no percentual calculado
+let parametro = "";
+const percentual = vagaCompativel.percentualCompatibilidade;
+switch (true) {
+  case percentual >= 80 && percentual <= 100:
+    parametro = "Compatibilidade alta";
+    break;
+  case percentual >= 50 && percentual < 80:
+    parametro = "Compatibilidade média";
+    break;
+  default:
+    parametro = "Compatibilidade baixa";
+}
+// Saida esperada
 if (vagaCompativel) {
   console.log("Vaga mais compatível para " + candidato.nome + ":");
   console.log(
@@ -99,34 +132,34 @@ if (vagaCompativel) {
       vagaCompativel.vaga.cargo +
       " \nCompatibilidade: " +
       vagaCompativel.percentualCompatibilidade.toFixed(0) +
-      "%",
-  );
-  console.log(
-    "Habilidades encontradas: " + vagaCompativel.possuiNaVaga.join(", "),
-  );
-  console.log(
-    "Habilidades faltantes: " + vagaCompativel.faltaNaVaga.join(", "),
-  );
-  let parametro = "";
-  const percentual = vagaCompativel.percentualCompatibilidade;
-
-  switch (true) {
-    case percentual >= 80 && percentual <= 100:
-      parametro = "Compatibilidade alta";
-      break;
-    case percentual >= 50 && percentual < 80:
-      parametro = "Compatibilidade media";
-      break;
-    default:
-      parametro = "Compatibilidade baixa";
-  }
-  console.log("Classificacao: " + parametro);
-  console.log(
-    "Recomendacção de estudo:" +
-      "\nPriorize aprender: " +
+      "%" +
+      "\nHabilidades encontradas: " +
+      vagaCompativel.possuiNaVaga.join(", ") +
+      "\nHabilidades faltantes: " +
       vagaCompativel.faltaNaVaga.join(", ") +
-      ", pois são as habilidades exigidas pela vaga que o candidato ainda não possui.",
+      "\nClassificação: " +
+      parametro,
   );
 } else {
-  console.log("Nao ha vagas em aberto para analise.");
+  console.log("Nao há vagas em aberto para analise.");
 }
+// Recomendação de estudo
+function monitorarVagas(vagas) {
+  //agrupa todas as habilidades exigidas pelas vagas, remove as repetidas e filtra apenas as que o candidato ainda não possui
+  const monitoramento = vagas
+    .map((vaga) => vaga.requisitos) // cria array de arrays
+    .flat() // vira um array unico de requisitos
+    .filter((hab, i, arr) => arr.indexOf(hab) === i) // remove repetidas
+    .filter((hab) => !candidato.habilidades.includes(hab)); // so as que nao possui
+  return monitoramento;
+}
+const habilidadesParaEstudar = monitorarVagas(vagas);
+console.log(
+  "Recomendação de estudo:" +
+    "\nPriorize aprender: " +
+    habilidadesParaEstudar.join(", ") +
+    ", pois são as habilidades exigidas pelo mercado para as vagas de Desenvolvedor Front-end.",
+);
+/*  alert("Habilidades encontradas: " + possuiNaVaga.join(", "));
+alert("Habilidades faltantes: " + faltaNaVaga.join(", "));
+} */
