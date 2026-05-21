@@ -64,15 +64,17 @@ const vagas = [
   },
 ];
 
-// Calcular qual a vaga é a mais compatível com as habilidades do candidato
+// Calcular qual vaga é a mais compatível com as habilidades do candidato
 function encontrarCompatibilidade(candidato, vagas) {
   let vagaCompativel = null;
 
   for (const vaga of vagas) {
     if (!vaga.vagaEmAberto) continue;
-    // calcula quais habilidades o candidato possui e quais faltam para cada vaga
+    // Verifica quais habilidades o candidato possui e quais faltam para cada vaga
     const { possuiNaVaga, faltaNaVaga } = vaga.requisitos.reduce(
+      //Arrow function para iterar sobre os requisitos da vaga e comparar com as habilidades do candidato
       (acumulador, requisito) => {
+        //Closure definida dentro do reduce
         if (candidato.habilidades.includes(requisito)) {
           acumulador.possuiNaVaga.push(requisito);
         } else {
@@ -162,4 +164,14 @@ console.log(
 );
 /*  alert("Habilidades encontradas: " + possuiNaVaga.join(", "));
 alert("Habilidades faltantes: " + faltaNaVaga.join(", "));
+} */
+/* class skills {
+  constructor() {
+    this.habilidades = [];
+    this.requisitos = [];
+  }
+  addSkill(skill) {
+    this.habilidades.push(skill);
+    this.requisitos.push(skill);
+  }
 } */
