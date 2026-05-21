@@ -1,10 +1,40 @@
-﻿// Objeto de Candidato
-const candidato = {
-  nome: "Pedro Silva",
-  area: "Front-end",
-  habilidades: ["HTML5", "CSS", "GitHub", "JavaScript"],
-  tempoExperienciaMeses: 3,
-};
+﻿// Opção de entrada de dados dos candidatos
+// Inicar
+
+/* const message = print(
+  "Bem-vindo ao SkillMatch! Vamos encontrar a vaga mais compatível para cada candidato.",
+);
+print("Digite o nome do candidato:");
+const nome = prompt("Digite o nome do candidato:");
+print("Digite a área de atuação:");
+const area = prompt("Digite a área de atuação:");
+print("Digite as habilidades (separadas por vírgula):");
+const habilidades = prompt(
+  "Digite as habilidades (separadas por vírgula):",
+).split(",");
+print("Digite o tempo de experiência (em meses):");
+const tempoExperienciaMeses = parseInt(
+  prompt("Digite o tempo de experiência (em meses):"),
+); */
+// Objeto de Candidato
+class Candidato {
+  constructor(nome, area, habilidades, tempoExperienciaMeses) {
+    this.nome = nome;
+    this.area = area;
+    this.habilidades = habilidades;
+    this.tempoExperienciaMeses = tempoExperienciaMeses;
+    /*  this.skills = [];
+    this.requisites = []; */
+  }
+}
+/* const candidato = new Candidato(nome, area, habilidades, tempoExperienciaMeses); */
+const candidato = new Candidato(
+  "John Doe",
+  "TI",
+  ["JavaScript", "CSS", "HTML5"],
+  12,
+);
+
 // Array de Vagas
 const vagas = [
   //vaga
