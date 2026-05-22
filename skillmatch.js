@@ -22,8 +22,8 @@ class Pessoa {
     this.areaDesejada = area;
   }
 
-  resumo() {
-    return `${this.nome} - Área Desejada: ${this.areaDesejada}`;
+  name() {
+    return this.nome + " - " + this.areaDesejada;
   }
 }
 // Herança da classe Pessoa
@@ -37,7 +37,7 @@ class Candidato extends Pessoa {
 // Exemplo de uso para candidato
 const candidato = new Candidato(
   "John Doe",
-  "TI",
+  "Desenvolvedor Front-end Junior",
   ["JavaScript", "CSS", "HTML5", "GitHub", "React", "Node.js", "Python"],
   12,
 );
@@ -83,7 +83,7 @@ const vagas = [
   new Vaga({
     vagaEmAberto: true,
     empresa: "Tech Master",
-    cargo: "Desenvolvedor Front-end Junior",
+    cargo: "Desenvolvedor Front-end Pleno",
     requisitos: [
       "JavaScript",
       "React",
@@ -113,7 +113,7 @@ const vagas = [
   new Vaga({
     vagaEmAberto: false,
     empresa: "Inova Solucoes",
-    cargo: "Desenvolvedor Front-end Junior",
+    cargo: "Estagiário Front-end Junior",
     requisitos: ["CSS", "HTML5", "Logica de Programacao", "GitHub"],
     salario: 2800,
     modalidade: "Remota",
@@ -121,7 +121,7 @@ const vagas = [
   new Vaga({
     vagaEmAberto: true,
     empresa: "Exelencia Softwares",
-    cargo: "Desenvolvedor Front-end Junior",
+    cargo: "Desenvolvedor Back-end Junior",
     requisitos: [
       "JavaScript",
       "HTML5",
@@ -133,6 +133,44 @@ const vagas = [
     ],
     salario: 8000,
     modalidade: "Hibrida",
+  }),
+  new Vaga({
+    vagaEmAberto: true,
+    empresa: "Pixel Labs",
+    cargo: "Estagiario Front-end",
+    requisitos: ["HTML5", "CSS", "JavaScript", "GitHub", "Responsividade"],
+    salario: 1800,
+    modalidade: "Presencial",
+  }),
+  new Vaga({
+    vagaEmAberto: false,
+    empresa: "Data Forge",
+    cargo: "Desenvolvedor Back-end Junior",
+    requisitos: [
+      "Node.js",
+      "Express",
+      "SQL",
+      "APIs REST",
+      "GitHub",
+      "Logica de Programacao",
+    ],
+    salario: 5200,
+    modalidade: "Hibrida",
+  }),
+  new Vaga({
+    vagaEmAberto: true,
+    empresa: "Cloud Vision",
+    cargo: "Desenvolvedor Full Stack Pleno",
+    requisitos: [
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Node.js",
+      "SQL",
+      "GitHub",
+    ],
+    salario: 9500,
+    modalidade: "Remota",
   }),
 ];
 
@@ -154,6 +192,7 @@ function encontrarCompatibilidade(candidato, vagas) {
           }
           return acumulador;
         },
+        // recebimento de resultados da interação do Reduce
         { possuiNaVaga: [], faltaNaVaga: [] },
       );
       // calcula o percentual de compatibilidade com base nas habilidades encontradas e faltantes
@@ -190,7 +229,35 @@ function encontrarCompatibilidade(candidato, vagas) {
 const calcularCompatibilidade = encontrarCompatibilidade(candidato, vagas);
 const vagaCompativel = calcularCompatibilidade();
 
+// Retorna requisitos e Percentual de compatibilidade -------------------------------------
+function requisitosVagas(vagas) {
+  for (const analise of vagas) {
+    console.log(
+      "Requisitos da vaga - " +
+        analise.cargo +
+        " - na empresa - " +
+        analise.empresa +
+        " em aberto:\n" +
+        analise.requisitos.join(" - "),
+      "\nO candidato não possui certas habilidades para esta vaga:\n" +
+        analise.requisitos
+          .filter((req) => !candidato.habilidades.includes(req))
+          .join(" - "),
+      "\nO percentual de compatibilidade para esta vaga é de: " +
+        Math.round(
+          (analise.requisitos.filter((req) =>
+            candidato.habilidades.includes(req),
+          ).length /
+            analise.requisitos.length) *
+            100,
+        ) +
+        "%",
+    );
+  }
+}
+
 // Calculo da compatibilidade percentual ------------------------------------------------------
+requisitosVagas(vagas);
 if (vagaCompativel) {
   // Classificar a compatibilidade em alta, média ou baixa com base no percentual calculado
   let parametro = "";
@@ -206,7 +273,7 @@ if (vagaCompativel) {
       parametro = "Compatibilidade baixa";
   }
   // Saída detalhada da vaga mais compatível encontrada
-  console.log("Vaga mais compatível para " + candidato.nome + ":");
+  console.log("Vaga mais compatível para " + candidato.name());
   console.log(
     "Empresa: " +
       vagaCompativel.vaga.empresa +
@@ -220,9 +287,9 @@ if (vagaCompativel) {
       vagaCompativel.percentualCompatibilidade.toFixed(0) +
       "%" +
       "\nHabilidades encontradas: " +
-      vagaCompativel.possuiNaVaga.join(", ") +
+      vagaCompativel.possuiNaVaga.join(" - ") +
       "\nHabilidades faltantes: " +
-      vagaCompativel.faltaNaVaga.join(", ") +
+      vagaCompativel.faltaNaVaga.join(" - ") +
       "\nClassificação: " +
       parametro,
   );
@@ -230,20 +297,25 @@ if (vagaCompativel) {
   console.log("Nao há vagas em aberto para analise.");
 }
 
-// Recomendação de estudo ----------------------------------------------------
-function monitorarVagas(vagas) {
-  //agrupa todas as habilidades exigidas pelas vagas, remove as repetidas e filtra apenas as que o candidato ainda não possui
-  const monitoramento = vagas
-    .map((vaga) => vaga.requisitos) // cria array de arrays
-    .flat() // vira um array unico de requisitos
+// Recomendação de estudo ---------------------------------------------------
+function monitorarVagas(vagas, candidato) {
+  const areaNormalizada = candidato.areaDesejada.toLowerCase();
+
+  const habilidadesParaEstudar = vagas
+    .filter((vaga) => vaga.vagaEmAberto)
+    .filter((vaga) => vaga.cargo.toLowerCase().includes(areaNormalizada))
+    // só vagas da área desejada
+    .map((vaga) => vaga.requisitos)
+    .flat()
     .filter((hab, i, arr) => arr.indexOf(hab) === i) // remove repetidas
-    .filter((hab) => !candidato.habilidades.includes(hab)); // so as que nao possui
-  return monitoramento;
+    .filter((hab) => !candidato.habilidades.includes(hab)); // só o que falta
+
+  return habilidadesParaEstudar;
 }
-const habilidadesParaEstudar = monitorarVagas(vagas);
+const habilidadesParaEstudar = monitorarVagas(vagas, candidato);
 console.log(
-  "Recomendação de estudo:" +
+  "Recomendação de estudo!" +
     "\nPriorize aprender: " +
-    habilidadesParaEstudar.join(", ") +
+    habilidadesParaEstudar.join(" - ") +
     ", pois são as habilidades exigidas pelo mercado para as vagas de Desenvolvedor Front-end.",
 );
