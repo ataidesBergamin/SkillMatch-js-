@@ -83,7 +83,7 @@ const vagas = [
   new Vaga({
     vagaEmAberto: true,
     empresa: "Tech Master",
-    cargo: "Desenvolvedor Front-end Pleno",
+    cargo: "Desenvolvedor Front-end Junior",
     requisitos: [
       "JavaScript",
       "React",
@@ -235,14 +235,14 @@ function requisitosVagas(vagas) {
     console.log(
       "Requisitos da vaga - " +
         analise.cargo +
-        " - na empresa - " +
+        ", na empresa - " +
         analise.empresa +
-        " em aberto:\n" +
-        analise.requisitos.join(" - "),
+        ", em aberto:\n" +
+        analise.requisitos.join(" | "),
       "\nO candidato não possui certas habilidades para esta vaga:\n" +
         analise.requisitos
           .filter((req) => !candidato.habilidades.includes(req))
-          .join(" - "),
+          .join(" | "),
       "\nO percentual de compatibilidade para esta vaga é de: " +
         Math.round(
           (analise.requisitos.filter((req) =>
@@ -298,24 +298,55 @@ if (vagaCompativel) {
 }
 
 // Recomendação de estudo ---------------------------------------------------
-function monitorarVagas(vagas, candidato) {
-  const areaNormalizada = candidato.areaDesejada.toLowerCase();
+function monitorarVagasEstritoEAmplo(vagas, candidato) {
+  // Reenderizaçao da palavras da área desejada
+  // uso do trim para remover espaços extras e do toLowerCase transformar tudo em minúsculo
+  const areaDesejadaNormalizada = candidato.areaDesejada.toLowerCase().trim();
+  // uso do split para dividir a string em palavras e do filter para remover palavras curtas (menos de 3 caracteres)
+  const palavrasDaArea = areaDesejadaNormalizada
+    .split(/\s+/)
+    .filter((palavra) => palavra.length > 2);
+  // validaçao vaga em aberto
+  const vagasEmAberto = vagas.filter((vaga) => vaga.vagaEmAberto);
+  // filtro para vagas que correspondem exatamente à área desejada do candidato
+  const vagasAlvoExato = vagasEmAberto.filter((vaga) =>
+    vaga.cargo.toLowerCase().includes(areaDesejadaNormalizada),
+  );
+  // uso do some para verificar se alguma das palavras da área desejada está presente no cargo da vaga
+  const vagasRelacionadas = vagasEmAberto.filter((vaga) => {
+    const cargoNormalizado = vaga.cargo.toLowerCase();
+    return palavrasDaArea.some((palavra) => cargoNormalizado.includes(palavra));
+  });
 
-  const habilidadesParaEstudar = vagas
-    .filter((vaga) => vaga.vagaEmAberto)
-    .filter((vaga) => vaga.cargo.toLowerCase().includes(areaNormalizada))
-    // só vagas da área desejada
-    .map((vaga) => vaga.requisitos)
-    .flat()
-    .filter((hab, i, arr) => arr.indexOf(hab) === i) // remove repetidas
-    .filter((hab) => !candidato.habilidades.includes(hab)); // só o que falta
-
-  return habilidadesParaEstudar;
+  const extrairHabilidadesFaltantes = (listaDeVagas) =>
+    listaDeVagas
+      .map((vaga) => vaga.requisitos) // extrai os requisitos de cada vaga em varios arrays
+      .flat() // junta os arrays em um único array
+      .filter((hab, i, arr) => arr.indexOf(hab) === i) // remove requisitos duplicados
+      // filtra apenas os requisitos que o candidato ainda não possui
+      .filter((hab) => !candidato.habilidades.includes(hab));
+  // remove as habilidades  já presentes nas vagas de alvo exato para evitar redundância na recomendação de estudo
+  const habilidadesAlvoExato = extrairHabilidadesFaltantes(vagasAlvoExato);
+  const habilidadesAreaRelacionadaBruta =
+    extrairHabilidadesFaltantes(vagasRelacionadas);
+  const habilidadesAreaRelacionada = habilidadesAreaRelacionadaBruta.filter(
+    (hab) => !habilidadesAlvoExato.includes(hab),
+  );
+  return {
+    // Objeto de resultados e seus atributos
+    habilidadesAlvoExato,
+    habilidadesAreaRelacionada,
+    vagasAlvoExato,
+    vagasAreaRelacionada: vagasRelacionadas,
+  };
 }
-const habilidadesParaEstudar = monitorarVagas(vagas, candidato);
+
+const recomendacaoExpandida = monitorarVagasEstritoEAmplo(vagas, candidato);
 console.log(
   "Recomendação de estudo!" +
-    "\nPriorize aprender: " +
-    habilidadesParaEstudar.join(" - ") +
-    ", pois são as habilidades exigidas pelo mercado para as vagas de Desenvolvedor Front-end.",
+    "\nPara atuar na vaga que o candidato deseja, ele deve aprender as seguintes habilidades:\n" +
+    "Requisitos de habilidades em vagas que o candidato deseja e não possui:\n" +
+    recomendacaoExpandida.habilidadesAlvoExato.join(" - ") +
+    "\nRequisitos de habilidades em vagas relacionadas à área de atuação:\n" +
+    recomendacaoExpandida.habilidadesAreaRelacionada.join(" - "),
 );
