@@ -1,4 +1,4 @@
-﻿//------------------------------- Inicio -----------------------------------
+//------------------------------- Inicio -----------------------------------
 // Opção de entrada de dados dos candidatos - (executa somente via Live Server)
 function iniciar() {
   return new Promise((resolve, reject) => {
@@ -204,7 +204,6 @@ const vagas = [
     modalidade: "Remota",
   }),
 ];
-
 // Calcular a compatibilidade -----------------------------------------------------
 // Calcula qual vaga é a mais compatível com as habilidades do candidato
 // Closure
@@ -245,6 +244,7 @@ function encontrarCompatibilidade(candidato, vagas) {
           ? melhorVaga
           : vagaCompativel;
     }
+// Comparacão com estrutura if para saber qual vaga é a mais compatível com as habilidades do candidato
     /*  if (
       !vagaCompativel ||
       compativel.percentualCompatibilidade >
