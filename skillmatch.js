@@ -1,19 +1,48 @@
 ﻿//------------------------------- Inicio -----------------------------------
 // Opção de entrada de dados dos candidatos - (executa somente via Live Server)
-/* function iniciar(callback) {
-  const nome = prompt("Digite o nome do candidato:");
-  const area = prompt("Digite a área de atuação:");
-  const habilidades = prompt("Digite as habilidades (separadas por vírgula):")
-    .split(",")
-    .map((habilidade) => habilidade.trim());
-  const tempoExperienciaMeses = parseInt(
-    prompt("Digite o tempo de experiência (em meses):"),
-    10,
-  );
-  if (callback) {
-    callback({ nome, area, habilidades, tempoExperienciaMeses });
-  }
-} */
+function iniciar() {
+  return new Promise((resolve, reject) => {
+    // remove espaços extras no inicio e no fim das palavras
+    const nomeInput = prompt("Digite o nome do candidato:");
+    // se nome for nulo retora um erro
+    if (nomeInput === null) return reject(new Error("Entrada cancelada."));
+    const nome = nomeInput.trim();
+    if (!nome) return reject(new Error("Nome inválido."));
+
+    const areaInput = prompt("Digite a área de atuação:");
+    if (areaInput === null) return reject(new Error("Entrada cancelada."));
+    const area = areaInput.trim().toLowerCase();
+    if (!area) return reject(new Error("Área inválida."));
+
+    const habilidadesInput = prompt(
+      "Digite as habilidades (separadas por vírgula):",
+    );
+    if (habilidadesInput === null)
+      return reject(new Error("Entrada cancelada."));
+    const habilidades = habilidadesInput
+      .split(",")
+      .map((habilidade) => habilidade.trim().toLowerCase())
+      .filter((habilidade) => habilidade.length > 0) // remove items vazios
+      .filter((hab, i, arr) => arr.indexOf(hab) === i); // remove habilidades duplicadas
+    if (!habilidades.length) return reject(new Error("Habilidades inválidas."));
+
+    const experienciaInput = prompt(
+      "Digite o tempo de experiência (em meses):",
+    );
+    if (experienciaInput === null)
+      return reject(new Error("Entrada cancelada."));
+    const tempoExperienciaMeses = Number(experienciaInput.trim());
+    if (
+      Number.isNaN(tempoExperienciaMeses) ||
+      tempoExperienciaMeses < 0 ||
+      !Number.isInteger(tempoExperienciaMeses)
+    ) {
+      return reject(new Error("Tempo de experiência inválido."));
+    }
+
+    resolve({ nome, area, habilidades, tempoExperienciaMeses });
+  });
+}
 
 // Objeto de Candidato -----------------------------------------------------
 class Pessoa {
@@ -34,25 +63,27 @@ class Candidato extends Pessoa {
     this.tempoExperienciaMeses = tempoExperienciaMeses;
   }
 }
-// Exemplo de uso para candidato
+// Exemplo de uso com dados de entrada
+/* let candidato;
+iniciar()
+  .then((dados) => {
+    candidato = new Candidato(
+      dados.nome,
+      dados.area,
+      dados.habilidades,
+      dados.tempoExperienciaMeses,
+    );
+  })
+  .catch((erro) => {
+    console.log(erro.message);
+  }); */
+// Exemplo de uso para candidato ficticio
 const candidato = new Candidato(
   "John Doe",
   "Desenvolvedor Front-end Junior",
   ["JavaScript", "CSS", "HTML5", "GitHub", "React", "Node.js", "Python"],
   12,
 );
-// Exemplo de uso com dados de entrada
-/* let candidato;
-iniciar((dados) => {
-  candidato = new Candidato(
-    dados.nome,
-    dados.area,
-    dados.habilidades,
-    dados.tempoExperienciaMeses,
-  );
-}); */
-
-/* alert("Teste de integração candidato: " + candidato.resumo()); */
 
 // Objeto de Vagas -----------------------------------------------------
 class Vaga {
