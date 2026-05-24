@@ -1,4 +1,4 @@
-//------------------------------- Inicio -----------------------------------
+﻿//------------------------------- Inicio -----------------------------------
 // Opção de entrada de dados dos candidatos - (executa somente via Live Server)
 function iniciar() {
   return new Promise((resolve, reject) => {
@@ -72,22 +72,29 @@ class Candidato {
 /* let candidato; */
 // espera a entrada dos dados para dar sequeincia ao fluxo
 async function executarComEntradaReal() {
+  const vagasAbertas = Vaga.filtrarVagasEmAberto(vagas);
+  const vagasFrontEnd = VagasFrontEnd.filtrarVagasFrontEnd(vagas).filter(
+    (vaga) => vaga.vagaEmAberto,
+  );
   const candidato = await criarCandidato();
   if (!candidato) return;
   console.log("Candidato carregado:", candidato.nome);
   // Redefinição da Closure para um Objeto de Candidato
   // execução da função encontrarCompatibilidade()
-  const calcularCompatibilidade = encontrarCompatibilidade(candidato, vagas);
+  const calcularCompatibilidade = encontrarCompatibilidade(
+    candidato,
+    vagasAbertas,
+  );
   const vagaCompativel = calcularCompatibilidade();
   // execução das funçãos
   // Calculo para compatibilidade baixa, media ou alta
   calcCompatib(vagaCompativel, candidato);
   // Indicação de estudo
-  const recomendacaoExpandida = monitorarVagasEstritoEAmplo(vagas, candidato);
+  const recomendacaoExpandida = monitorarVagas(vagasFrontEnd, candidato);
   console.log(
     "Recomendação de estudo!" +
       "\nPara atuar na vaga que o candidato deseja, ele deve aprender as seguintes habilidades:\n" +
-      "Requisitos de habilidades em vagas que o candidato deseja e não possui:\n" +
+      "Requisitos em vagas que o candidato deseja atuar mas não possui estas habilidades:\n" +
       recomendacaoExpandida.habilidadesAlvoExato.join(" - ") +
       "\nRequisitos de habilidades em vagas relacionadas à área de atuação:\n" +
       recomendacaoExpandida.habilidadesAreaRelacionada.join(" - "),
@@ -95,8 +102,6 @@ async function executarComEntradaReal() {
   //Analise dos requisitos nas vagas em aberto
   requisitosVagas(vagas, candidato);
 }
-executarComEntradaReal();
-
 // Objeto de Vagas -----------------------------------------------------
 class Vaga {
   constructor({
@@ -114,14 +119,36 @@ class Vaga {
     this.modalidade = modalidade;
     this.vagaEmAberto = vagaEmAberto;
   }
-
-  descricao() {
-    return `${this.empresa} | ${this.cargo} | ${this.modalidade}`;
+  static filtrarVagasEmAberto(vagas) {
+    return vagas.filter((vaga) => vaga.vagaEmAberto);
   }
 }
-// alert("Teste de integração vaga: " + vaga.descricao());
-// mudar este alert para exibir descricao
-
+// Herança da classe vaga
+class VagasFrontEnd extends Vaga {
+  constructor({
+    empresa,
+    cargo,
+    requisitos,
+    salario,
+    modalidade,
+    vagaEmAberto = true,
+  }) {
+    super({
+      empresa,
+      cargo,
+      requisitos,
+      salario,
+      modalidade,
+      vagaEmAberto,
+    });
+  }
+  // filtra so vagas Front-end
+  static filtrarVagasFrontEnd(vagas) {
+    return vagas.filter((vaga) =>
+      vaga.cargo.toLowerCase().includes("front-end"),
+    );
+  }
+}
 // Exemplo de uso paravagas
 const vagas = [
   new Vaga({
@@ -220,11 +247,10 @@ const vagas = [
 // Calcular a compatibilidade -----------------------------------------------------
 // Calcula qual vaga é a mais compatível com as habilidades do candidato
 // Closure
-function encontrarCompatibilidade(candidato, vagas) {
+function encontrarCompatibilidade(candidato, vagasAbertas) {
   let vagaCompativel = null; // Valor guardado
   return function () {
-    for (const vaga of vagas) {
-      if (!vaga.vagaEmAberto) continue;
+    for (const vaga of vagasAbertas) {
       // calcula quais habilidades o candidato possui e quais faltam para cada vaga
       const { possuiNaVaga, faltaNaVaga } = vaga.requisitos.reduce(
         (acumulador, requisito) => {
@@ -257,7 +283,7 @@ function encontrarCompatibilidade(candidato, vagas) {
           ? melhorVaga
           : vagaCompativel;
     }
-// Comparacão com estrutura if para saber qual vaga é a mais compatível com as habilidades do candidato
+    // Comparacão com estrutura if para saber qual vaga é a mais compatível com as habilidades do candidato
     /*  if (
       !vagaCompativel ||
       compativel.percentualCompatibilidade >
@@ -272,11 +298,11 @@ function encontrarCompatibilidade(candidato, vagas) {
 
 // Retorna requisitos e Percentual de compatibilidade
 // Percore todas as vagas em aberto e retorna os requisitos e a conpatibilidade de cada vaga
-function requisitosVagas(vagas, candidato) {
+function requisitosVagas(vagasAbertas, candidato) {
   const habilidadesNormalizadas = candidato.habilidades.map((habilidade) =>
     habilidade.trim().toLowerCase(),
   );
-  for (const analise of vagas) {
+  for (const analise of vagasAbertas) {
     console.log(
       "Requisitos da vaga - " +
         analise.cargo +
@@ -345,24 +371,36 @@ function calcCompatib(vagaCompativel, candidato) {
     console.log("Nao há vagas em aberto para analise.");
   }
 }
-
 // Recomendação de estudo ---------------------------------------------------
-function monitorarVagasEstritoEAmplo(vagas, candidato) {
-  // Reenderizaçao da palavras da área desejada
+function monitorarVagas(vagasFrontEnd, candidato) {
+  // Criar função de Callback ----------------------------------------------------
+  function meuFilter(lista, callback) {
+    const resultado = [];
+
+    for (const item of lista) {
+      if (callback(item)) {
+        resultado.push(item);
+      }
+    }
+
+    return resultado;
+  }
+  // Formatação das palavras da área desejada
   // uso do trim para remover espaços extras e do toLowerCase transformar tudo em minúsculo
   const areaDesejadaNormalizada = candidato.areaDesejada.toLowerCase().trim();
   // uso do split para dividir a string em palavras e do filter para remover palavras curtas (menos de 3 caracteres)
-  const palavrasDaArea = areaDesejadaNormalizada
-    .split(/\s+/)
-    .filter((palavra) => palavra.length > 2);
+  const palavrasDaArea = meuFilter(
+    areaDesejadaNormalizada.split(/\s+/),
+    (palavra) => palavra.length > 2,
+  );
   // validaçao vaga em aberto
-  const vagasEmAberto = vagas.filter((vaga) => vaga.vagaEmAberto);
+  const vagasEmAberto = vagasFrontEnd;
   // filtro para vagas que correspondem exatamente à área desejada do candidato
-  const vagasAlvoExato = vagasEmAberto.filter((vaga) =>
+  const vagasAlvoExato = meuFilter(vagasEmAberto, (vaga) =>
     vaga.cargo.toLowerCase().includes(areaDesejadaNormalizada),
   );
   // uso do some para verificar se alguma das palavras da área desejada está presente no cargo da vaga
-  const vagasRelacionadas = vagasEmAberto.filter((vaga) => {
+  const vagasRelacionadas = meuFilter(vagasEmAberto, (vaga) => {
     const cargoNormalizado = vaga.cargo.toLowerCase();
     return palavrasDaArea.some((palavra) => cargoNormalizado.includes(palavra));
   });
@@ -389,3 +427,5 @@ function monitorarVagasEstritoEAmplo(vagas, candidato) {
     vagasAreaRelacionada: vagasRelacionadas,
   };
 }
+
+executarComEntradaReal();
