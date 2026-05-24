@@ -429,3 +429,4 @@ function monitorarVagas(vagasFrontEnd, candidato) {
 }
 
 executarComEntradaReal();
+//--------------------------- Fim ----------------------------------------------------------
