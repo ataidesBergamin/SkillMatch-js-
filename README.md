@@ -22,13 +22,15 @@ De forma simples, o processo acontece assim:
 
 Neste projeto, o arquivo `develop.html` representa a pagina aberta no navegador. Ele carrega o arquivo `skillmatch.js`, que contem a logica do sistema.
 
-Como o projeto roda localmente com Live Server, os arquivos sao servidos a partir da propria maquina. O navegador executa o JavaScript, mostra os prompts para entrada dos dados e exibe os resultados no console.
+Como o projeto roda localmente com Live Server, os arquivos sao servidos a partir da propria maquina. O navegador executa o JavaScript, simula a busca dos dados da pessoa candidata e exibe os resultados no console.
 
 ## Como funciona
 
-O sistema solicita os dados da pessoa candidata por meio de `prompt`:
+O sistema simula uma busca pelos dados da pessoa candidata usando uma `Promise`. Esses dados representam uma resposta ficticia que poderia vir de uma API, banco de dados ou outro servico externo.
 
-- nome;
+Os dados simulados incluem:
+
+- nome da pessoa candidata;
 - area desejada;
 - habilidades;
 - tempo de experiencia em meses.
@@ -45,6 +47,20 @@ Depois disso, o programa:
 
 Os resultados aparecem no console do navegador.
 
+## Simulacao de busca com Promise
+
+A `Promise` e usada para representar uma operacao assincrona, ou seja, uma tarefa que pode demorar para responder. No projeto, ela simula a busca dos dados da pessoa candidata.
+
+Com essa simulacao, o fluxo fica mais parecido com um sistema real:
+
+1. O programa inicia a busca dos dados.
+2. A `Promise` aguarda um tempo simulado.
+3. Se os dados forem encontrados, a Promise retorna as informacoes da pessoa candidata.
+4. Se os dados nao forem encontrados, a Promise retorna um erro.
+5. A funcao `async` usa `await` para esperar o resultado antes de criar o objeto da classe `Candidato`.
+
+Mesmo com os dados vindo de uma busca simulada, a classe `Candidato` continua sendo usada para organizar as informacoes dentro do sistema.
+
 ## Como executar
 
 Este projeto foi feito para rodar no navegador.
@@ -53,9 +69,8 @@ Este projeto foi feito para rodar no navegador.
 2. Instale ou use a extensao Live Server.
 3. Abra o arquivo `develop.html`.
 4. Clique com o botao direito e escolha `Open with Live Server`.
-5. Responda aos prompts que aparecem na tela.
-6. Clique com o botao direito na pagina web e selecione `Inspecionar`.
-7. Selecione o `console` do navegador para ver os resultados.
+5. Clique com o botao direito na pagina web e selecione `Inspecionar`.
+6. Selecione o `console` do navegador para ver os resultados.
 
 ## Arquivos principais
 
@@ -83,7 +98,8 @@ Este projeto pratica conceitos importantes de JavaScript:
 - manipulacao de strings com `trim`, `toLowerCase` e `split`;
 - metodos de array como `map`, `filter`, `reduce`, `some`, `flat` e `join`;
 - tratamento simples de erros com `try...catch`;
-- interacao com o navegador usando `prompt` e `console.log`.
+- simulacao de busca de dados;
+- exibicao de resultados com `console.log`.
 
 ## Callback no projeto
 

@@ -1,52 +1,35 @@
 ﻿//------------------------------- Inicio -----------------------------------
-// Opção de entrada de dados dos candidatos - (executa somente via Live Server)
-function iniciar() {
+// Simulação de buscar dados do candidato em servidor ----------------------
+function buscarDadosCandidato() {
   return new Promise((resolve, reject) => {
-    // remove espaços extras no inicio e no fim das palavras
-    const nomeInput = prompt("Digite o nome do candidato:");
-    // se nome for nulo retora um erro
-    if (nomeInput === null) return reject(new Error("Entrada cancelada."));
-    const nome = nomeInput.trim();
-    if (!nome) return reject(new Error("Nome inválido."));
+    console.log("Buscando dados do candidato...");
 
-    const areaInput = prompt("Digite a área de atuação:");
-    if (areaInput === null) return reject(new Error("Entrada cancelada."));
-    const area = areaInput.trim().toLowerCase();
-    if (!area) return reject(new Error("Área inválida."));
+    setTimeout(() => {
+      const candidatoEncontrado = true;
 
-    const habilidadesInput = prompt(
-      "Digite as habilidades (separadas por vírgula):",
-    );
-    if (habilidadesInput === null)
-      return reject(new Error("Entrada cancelada."));
-    const habilidades = habilidadesInput
-      .split(",")
-      .map((habilidade) => habilidade.trim().toLowerCase())
-      .filter((habilidade) => habilidade.length > 0) // remove items vazios
-      .filter((hab, i, arr) => arr.indexOf(hab) === i); // remove habilidades duplicadas
-    if (!habilidades.length) return reject(new Error("Habilidades inválidas."));
-
-    const experienciaInput = prompt(
-      "Digite o tempo de experiência (em meses):",
-    );
-    if (experienciaInput === null)
-      return reject(new Error("Entrada cancelada."));
-    const tempoExperienciaMeses = Number(experienciaInput.trim());
-    if (
-      Number.isNaN(tempoExperienciaMeses) ||
-      tempoExperienciaMeses < 0 ||
-      !Number.isInteger(tempoExperienciaMeses)
-    ) {
-      return reject(new Error("Tempo de experiência inválido."));
-    }
-
-    resolve({ nome, area, habilidades, tempoExperienciaMeses });
+      if (candidatoEncontrado) {
+        resolve({
+          nome: "Ataides Bergamin",
+          area: "front-end junior",
+          habilidades: [
+            "javascript",
+            "html5",
+            "css",
+            "github",
+            "ingles intermediario",
+          ],
+          tempoExperienciaMeses: 6,
+        });
+      } else {
+        reject(new Error("Candidato não encontrado."));
+      }
+    }, 2000);
   });
 }
 async function criarCandidato() {
-  // se a função iniciar falhar cai direto no catch para tratamento de erro
   try {
-    const dados = await iniciar();
+    const dados = await buscarDadosCandidato();
+
     return new Candidato(
       dados.nome,
       dados.area,
@@ -58,7 +41,6 @@ async function criarCandidato() {
     return null;
   }
 }
-
 // Objeto de Candidato -----------------------------------------------------
 class Candidato {
   constructor(nome, area, habilidades, tempoExperienciaMeses) {
@@ -93,10 +75,9 @@ async function executarComEntradaReal() {
   const recomendacaoExpandida = monitorarVagas(vagasFrontEnd, candidato);
   console.log(
     "Recomendação de estudo!" +
-      "\nPara atuar na vaga que o candidato deseja, ele deve aprender as seguintes habilidades:\n" +
-      "Requisitos em vagas que o candidato deseja atuar mas não possui estas habilidades:\n" +
+      "Requisitos para as vagas que o candidato deseja atuar, mas não possui estas habilidades:\n" +
       recomendacaoExpandida.habilidadesAlvoExato.join(" - ") +
-      "\nRequisitos de habilidades em vagas relacionadas à área de atuação:\n" +
+      `\nRequisitos de habilidades em vagas relacionadas à área ${candidato.areaDesejada}:\n` +
       recomendacaoExpandida.habilidadesAreaRelacionada.join(" - "),
   );
   //Analise dos requisitos nas vagas em aberto
