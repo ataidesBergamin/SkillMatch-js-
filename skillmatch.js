@@ -50,8 +50,6 @@ class Candidato {
     this.tempoExperienciaMeses = tempoExperienciaMeses;
   }
 }
-// Exemplo de uso com dados de entrada
-/* let candidato; */
 // espera a entrada dos dados para dar sequeincia ao fluxo
 async function executarComEntradaReal() {
   const vagasAbertas = Vaga.filtrarVagasEmAberto(vagas);
